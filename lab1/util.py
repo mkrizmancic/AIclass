@@ -433,6 +433,10 @@ def raiseNotDefined():
     print "*** Method not implemented: %s at line %s of %s" % (method, line, fileName)
     sys.exit(1)
 
+def raiseSolutionNotFound():
+    print "No solution found!"
+    sys.exit(2795)
+
 def normalize(vectorOrCounter):
     """
     normalize a vector or counter by dividing each value by the sum of all values

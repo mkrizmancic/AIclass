@@ -29,13 +29,13 @@ class SearchNode:
     REMINDER: You need to fill in the backtrack function in this class!
     """
 
-    def __init__(self, position, parent=None, transition=None, cost=0, heuristic=0):
+    def __init__(self, state, parent=None, transition=None, cost=0, heuristic=0):
         """
         Basic constructor which copies the values. Remember, you can access all the 
         values of a python object simply by referencing them - there is no need for 
         a getter method. 
         """
-        self.position = position
+        self.state = state
         self.parent = parent
         self.cost = cost
         self.heuristic = heuristic
@@ -53,8 +53,7 @@ class SearchNode:
         Return all relevant values for the current node.
         Returns position, parent node, cost, heuristic value
         """
-        return self.position, self.parent, self.cost, self.heuristic
-
+        return self.state, self.parent, self.cost, self.heuristic
 
     def backtrack(self):
         """
@@ -68,10 +67,21 @@ class SearchNode:
 
         if node.isRootNode(): 
             # The initial state is the final state
-            return moves        
+            return moves
+        
+        moves = node.parent.backtrack()
+        moves.append(node.transition)
+        return moves  
 
         "**YOUR CODE HERE**"
         util.raiseNotDefined()
+    
+    def expand(self, succ):
+        childrenNodes = []
+        for item in succ:
+            childrenNodes.append(SearchNode(item[0], self, item[1], self.cost + item[2]))
+        return childrenNodes
+
 
 
 class SearchProblem:
@@ -141,18 +151,63 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    open = util.Stack()
+    visited = set()
+    startState = problem.getStartState()
+    initialNode = SearchNode (problem.getStartState())
+    open.push(initialNode)
+    while not open.isEmpty():
+        n = open.pop()
+        while n.state in visited:
+            n = open.pop()
+        visited.add(n.state)
+        if problem.isGoalState(n.state):
+            return n.backtrack()
+        lista = n.expand(problem.getSuccessors(n.state))
+        for m in lista:
+            if m.state not in visited:
+                open.push(m)
+    return util.raiseSolutionNotFound()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    open = util.Queue()
+    visited = set()
+    startState = problem.getStartState()
+    initialNode = SearchNode (problem.getStartState())
+    open.push(initialNode)
+    while not open.isEmpty():
+        n = open.pop()
+        while n.state in visited:
+            n = open.pop()
+        visited.add(n.state)
+        if problem.isGoalState(n.state):
+            return n.backtrack()
+        lista = n.expand(problem.getSuccessors(n.state))
+        for m in lista:
+            if m.state not in visited:
+                open.push(m)
+    return util.raiseSolutionNotFound()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    open = util.PriorityQueue()
+    visited = set()
+    startState = problem.getStartState()
+    initialNode = SearchNode (problem.getStartState())
+    open.push(initialNode, initialNode.cost)
+    while not open.isEmpty():
+        n = open.pop()
+        while n.state in visited:
+            n = open.pop()
+        visited.add(n.state)
+        if problem.isGoalState(n.state):
+            return n.backtrack()
+        lista = n.expand(problem.getSuccessors(n.state))
+        for m in lista:
+            if m.state not in visited:
+                open.push(m, m.cost)
+    return util.raiseSolutionNotFound()
 
 def nullHeuristic(state, problem=None):
     """
@@ -164,7 +219,39 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    open = util.PriorityQueue()
+    closed = list()
+    startState = problem.getStartState()
+    initialNode = SearchNode (problem.getStartState())
+    open.push(initialNode, initialNode.cost)
+    while not open.isEmpty():
+        n = open.pop()
+        if problem.isGoalState(n.state):
+            return n.backtrack()
+        closed.append(n)
+        lista = n.expand(problem.getSuccessors(n.state))
+        for m in lista:
+            i = 0
+            remove = []
+            for m_temp in open.heap:
+                if m_temp.state == m.state:
+                    if m_temp.cost > m.cost:
+                        remove.append(i)
+                i+=1
+            for i in remove: open.heap.pop(i)
+            i = 0
+            remove = []
+            for m_temp in closed:
+                if m_temp.state == m.state:
+                    if m_temp.cost > m.cost:
+                        remove.append(i)
+                i+=1
+            for i in remove: closed.pop(i)
+
+                
+            f = n.cost + heuristic(n.state, problem)
+            open.push(m, f)
+    return util.raiseSolutionNotFound()
 
 
 # Abbreviations
