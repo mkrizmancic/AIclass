@@ -299,14 +299,17 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         
-        return ( self.startingPosition , (True, True, True, True))
+        return (self.startingPosition , 0b1111)
+        # Each bit represents food in its respective corner
+        # bit 3 - bottom left, bit 2 - top left, bit 1 - top right, bit 0 - bottom right
+        # value = 1 (True) - there is food in that corner
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return not (True in state[1])
+        return not state[1]
 
     def getSuccessors(self, state):
         """
@@ -327,10 +330,10 @@ class CornersProblem(search.SearchProblem):
             if not self.walls[nextx][nexty]:
                 # UPGRADE use bitwise operation and masks
                 currentFood = state[1]
-                if (nextx, nexty) == (1, 1): nextFood = (False, currentFood[1], currentFood[2], currentFood[3])
-                elif (nextx, nexty) == (1, self.top): nextFood = (currentFood[0], False, currentFood[2], currentFood[3])
-                elif (nextx, nexty) == (self.right, 1): nextFood = (currentFood[0], currentFood[1], False, currentFood[3])
-                elif (nextx, nexty) == (self.right, self.top): nextFood = (currentFood[0], currentFood[1], currentFood[2], False)
+                if (nextx, nexty) == (1, 1): nextFood = currentFood & 0b0111 # there is no more food in bottom left corner - set flag  to false
+                elif (nextx, nexty) == (1, self.top): nextFood = currentFood & 0b1011
+                elif (nextx, nexty) == (self.right, 1): nextFood = currentFood & 0b1101
+                elif (nextx, nexty) == (self.right, self.top): nextFood = currentFood & 0b1110
                 else: nextFood = currentFood
                 #cost = self.costFn(nextState)
                 cost = 1
@@ -371,11 +374,11 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     goalsList = []
-    i = 0
-    for goal in state[1]:
-        if goal:
+    mask = 0b1000
+    for i in range(4):
+        if (mask & state[1]):
             goalsList.append(abs(state[0][0] - corners[i][0]) + abs(state[0][1] - corners[i][1]))
-        i += 1
+        mask = mask >> 1
     if goalsList:
         return min(goalsList)
     else:

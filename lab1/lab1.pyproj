@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{decb2c7e-78e3-4797-91cd-885a4aa05b45}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>autograder.py</StartupFile>
+    <StartupFile>pacman.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -13,8 +13,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId />
     <InterpreterVersion />
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments>-l mediumCorners -p AStarCornersAgent -z 0.5</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
