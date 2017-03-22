@@ -288,6 +288,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.goals = []
+        for corner in self.corners:
+            self.goals.append(corner + (4,))
+        self.visitedCorners = set()
+
 
     def getStartState(self):
         """
@@ -295,14 +300,15 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        return ( self.startingPosition , (True, True, True, True))
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return not (True in state[1])
 
     def getSuccessors(self, state):
         """
@@ -317,14 +323,20 @@ class CornersProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                # UPGRADE use bitwise operation and masks
+                currentFood = state[1]
+                if (nextx, nexty) == (1, 1): nextFood = (False, currentFood[1], currentFood[2], currentFood[3])
+                elif (nextx, nexty) == (1, 6): nextFood = (currentFood[0], False, currentFood[2], currentFood[3])
+                elif (nextx, nexty) == (6, 1): nextFood = (currentFood[0], currentFood[1], False, currentFood[3])
+                elif (nextx, nexty) == (6, 6): nextFood = (currentFood[0], currentFood[1], currentFood[2], False)
+                else: nextFood = currentFood
+                #cost = self.costFn(nextState)
+                cost = 1
+                successors.append(( ( (nextx, nexty), nextFood ), action, cost) )
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
