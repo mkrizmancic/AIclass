@@ -231,7 +231,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             repeat = 0
             for m_temp in closed:
                 if m_temp.state == n.state:
-                    if m_temp.cost < n.cost:
+                    if m_temp.cost <= n.cost:
                         repeat = 1
                         n = open.pop()
 
@@ -246,13 +246,15 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     if m_temp.cost < m.cost:
                         skip = 1
                         break
-            for m_temp in open.heap:
-                if m_temp[2].state == m.state:
-                    if m_temp[2].cost < m.cost:
-                        skip = 1
-                        break
             if not skip:
-                f = m.cost + heuristic(m.state, problem)
+                for m_temp in open.heap:
+                    if m_temp[2].state == m.state:
+                        if m_temp[2].cost < m.cost:
+                            skip = 1
+                            break
+            if not skip:
+                parent_f = m.parent.cost + heuristic(m.parent.state, problem)
+                f = max(parent_f, m.cost + heuristic(m.state, problem))
                 open.push(m, f)
     return util.raiseSolutionNotFound()
 

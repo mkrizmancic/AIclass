@@ -288,10 +288,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.goals = []
-        for corner in self.corners:
-            self.goals.append(corner + (4,))
-        self.visitedCorners = set()
+        self.top = top
+        self.right = right
 
 
     def getStartState(self):
@@ -330,9 +328,9 @@ class CornersProblem(search.SearchProblem):
                 # UPGRADE use bitwise operation and masks
                 currentFood = state[1]
                 if (nextx, nexty) == (1, 1): nextFood = (False, currentFood[1], currentFood[2], currentFood[3])
-                elif (nextx, nexty) == (1, 6): nextFood = (currentFood[0], False, currentFood[2], currentFood[3])
-                elif (nextx, nexty) == (6, 1): nextFood = (currentFood[0], currentFood[1], False, currentFood[3])
-                elif (nextx, nexty) == (6, 6): nextFood = (currentFood[0], currentFood[1], currentFood[2], False)
+                elif (nextx, nexty) == (1, self.top): nextFood = (currentFood[0], False, currentFood[2], currentFood[3])
+                elif (nextx, nexty) == (self.right, 1): nextFood = (currentFood[0], currentFood[1], False, currentFood[3])
+                elif (nextx, nexty) == (self.right, self.top): nextFood = (currentFood[0], currentFood[1], currentFood[2], False)
                 else: nextFood = currentFood
                 #cost = self.costFn(nextState)
                 cost = 1
@@ -372,6 +370,16 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    goalsList = []
+    i = 0
+    for goal in state[1]:
+        if goal:
+            goalsList.append(abs(state[0][0] - corners[i][0]) + abs(state[0][1] - corners[i][1]))
+        i += 1
+    if goalsList:
+        return min(goalsList)
+    else:
+        return 0
     return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
