@@ -225,32 +225,35 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     initialNode = SearchNode (problem.getStartState())
     open.push(initialNode, initialNode.cost)
     while not open.isEmpty():
+        repeat = 1
         n = open.pop()
+        while repeat:
+            repeat = 0
+            for m_temp in closed:
+                if m_temp.state == n.state:
+                    if m_temp.cost < n.cost:
+                        repeat = 1
+                        n = open.pop()
+
         if problem.isGoalState(n.state):
             return n.backtrack()
         closed.append(n)
         lista = n.expand(problem.getSuccessors(n.state))
         for m in lista:
-            i = 0
-            remove = []
-            for m_temp in open.heap:
-                if m_temp.state == m.state:
-                    if m_temp.cost > m.cost:
-                        remove.append(i)
-                i+=1
-            for i in remove: open.heap.pop(i)
-            i = 0
-            remove = []
+            skip = 0
             for m_temp in closed:
                 if m_temp.state == m.state:
-                    if m_temp.cost > m.cost:
-                        remove.append(i)
-                i+=1
-            for i in remove: closed.pop(i)
-
-                
-            f = n.cost + heuristic(n.state, problem)
-            open.push(m, f)
+                    if m_temp.cost < m.cost:
+                        skip = 1
+                        break
+            for m_temp in open.heap:
+                if m_temp[2].state == m.state:
+                    if m_temp[2].cost < m.cost:
+                        skip = 1
+                        break
+            if not skip:
+                f = m.cost + heuristic(m.state, problem)
+                open.push(m, f)
     return util.raiseSolutionNotFound()
 
 
