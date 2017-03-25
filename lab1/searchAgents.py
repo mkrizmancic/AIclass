@@ -328,7 +328,6 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
-                # UPGRADE use bitwise operation and masks
                 currentFood = state[1]
                 if (nextx, nexty) == (1, 1): nextFood = currentFood & 0b0111 # there is no more food in bottom left corner - set flag  to false
                 elif (nextx, nexty) == (1, self.top): nextFood = currentFood & 0b1011
@@ -493,8 +492,15 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+
+    max_distance = 0
+    for food in foodGrid.asList():
+        max_distance = max(max_distance, abs(position[0] - food[0]) + abs(position[1] - food[1]))
+
+    if not foodGrid.asList():
+        return 0
+    return max_distance
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
