@@ -83,7 +83,6 @@ class SearchNode:
         return childrenNodes
 
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement

@@ -291,14 +291,12 @@ class CornersProblem(search.SearchProblem):
         self.top = top
         self.right = right
 
-
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        
         return (self.startingPosition , 0b1111)
         # Each bit represents food in its respective corner
         # bit 3 - bottom left, bit 2 - top left, bit 1 - top right, bit 0 - bottom right
@@ -531,7 +529,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -567,7 +565,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
+
 
 def mazeDistance(point1, point2, gameState):
     """
