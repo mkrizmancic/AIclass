@@ -152,7 +152,6 @@ def depthFirstSearch(problem):
     """
     open = util.Stack()
     visited = set()
-    startState = problem.getStartState()
     initialNode = SearchNode (problem.getStartState())
     open.push(initialNode)
     while not open.isEmpty():
@@ -172,7 +171,6 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     open = util.Queue()
     visited = set()
-    startState = problem.getStartState()
     initialNode = SearchNode (problem.getStartState())
     open.push(initialNode)
     while not open.isEmpty():
@@ -192,7 +190,6 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     open = util.PriorityQueue()
     visited = set()
-    startState = problem.getStartState()
     initialNode = SearchNode (problem.getStartState())
     open.push(initialNode, initialNode.cost)
     while not open.isEmpty():
@@ -220,7 +217,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
     open = util.PriorityQueue()
     closed = list()
-    startState = problem.getStartState()
     initialNode = SearchNode (problem.getStartState())
     open.push(initialNode, initialNode.cost)
     while not open.isEmpty():
