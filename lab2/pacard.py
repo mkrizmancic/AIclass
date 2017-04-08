@@ -99,27 +99,7 @@ def logicBasedSearch(problem):
     visitedStates = []
     startState = problem.getStartState()
     visitedStates.append(startState)
-    """
-    ####################################
-    ###                              ###
-    ###        YOUR CODE HERE        ###
-    ###                              ###
-    ####################################
-    """
 
-####################################
-###                              ###
-###        YOUR CODE THERE       ###
-###                              ###
-####################################
-
-"""
-        ####################################
-        ###                              ###
-        ###      YOUR CODE EVERYWHERE    ###
-        ###                              ###
-        ####################################
-"""
 
 # Abbreviations
 lbs = logicBasedSearch
