@@ -221,13 +221,27 @@ def resolution(clauses, goal):
     """
     resolvedPairs = set()
     setOfSupport = goal.negateAll() 
-    """
-    ####################################
-    ###                              ###
-    ###        YOUR CODE HERE        ###
-    ###                              ###
-    ####################################
-    """
+    
+    while True:
+        possibleClauses = selectClauses(clauses, setOfSupport, resolvedPairs)
+        if len(possibleClauses) == 0:
+               return False
+        for (c1, c2) in possibleClauses:
+            if (c1, c2) not in resolvedPairs:
+                resolvent = resolvePair(c1, c2)
+                resolvedPairs.add( (c1, c2) )
+                if isinstance(resolvent, Clause):
+                    if len(resolvent.literals) == 0:
+                        return True
+                    if not resolvent.isRedundant(clauses | setOfSupport):
+                        setOfSupport.add(resolvent)
+
+        removeRedundant(clauses, setOfSupport)
+
+        if setOfSupport.issubset(clauses):
+           return False
+
+
 
 def removeRedundant(clauses, setOfSupport):
     """
@@ -235,35 +249,54 @@ def removeRedundant(clauses, setOfSupport):
     from the aforementioned sets. 
     Be careful not to do the operation in-place as you will modify the 
     original sets. (why?)
-    ####################################
-    ###                              ###
-    ###        YOUR CODE HERE        ###
-    ###                              ###
-    ####################################
     """
-    pass 
+
+    allClauses = clauses | setOfSupport
+    clauses_copy = clauses.copy()
+    setOfSupport_copy = setOfSupport.copy()
+
+    for clause in clauses_copy:
+        if clause.isRedundant(allClauses):
+            clauses.remove(clause)
+    for clause in setOfSupport_copy:
+        if clause.isRedundant(allClauses):
+            setOfSupport.remove(clause)
+    
+     
 
 def resolvePair(firstClause, secondClause):
     """
     Resolve a pair of clauses.
-    ####################################
-    ###                              ###
-    ###        YOUR CODE HERE        ###
-    ###                              ###
-    ####################################
     """
-    pass 
+    union = firstClause.literals | secondClause.literals
+    new_literals = set()
+    valid_clause_counter = 0
+    for literal in union:
+        if literal.negate() not in union:
+            new_literals.add(literal)
+        else:
+            valid_clause_counter += 1
+    if valid_clause_counter > 2:
+        return 1
+    else: 
+        return Clause(new_literals)
 
 def selectClauses(clauses, setOfSupport, resolvedPairs):
     """
     Select pairs of clauses to resolve.
-    ####################################
-    ###                              ###
-    ###        YOUR CODE HERE        ###
-    ###                              ###
-    ####################################
     """
-    pass 
+    SoS = setOfSupport.copy()
+    possibleClauses = []
+
+    while len(SoS) > 0:
+        c1 = SoS.pop()
+        for c2 in (clauses | setOfSupport):
+            if c1.isResolveableWith(c2):
+                if (c1, c2) not in resolvedPairs:
+                    possibleClauses.append( (c1, c2) )
+
+    return possibleClauses
+
 
 def testResolution():
     """
