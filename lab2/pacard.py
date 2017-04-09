@@ -99,7 +99,7 @@ def logicBasedSearch(problem):
     visitedStates = []
     gameMap = dict()
     safeStates = util.PriorityQueueWithFunction(stateWeight)
-    unknownStates = util.PriorityQueueWithFunction(stateWeight)
+    unknownStates = util.PriorityQueueWithFunction(stateWeightSpecial)
     propDict = {"safe":0, "poison":0, "wumpus":0, "teleporter":0}
 
     startState = problem.getStartState()
@@ -107,8 +107,9 @@ def logicBasedSearch(problem):
     visitedStates.append(currentState)
     gameMap[currentState] = propDict.copy()
     gameMap[currentState]["safe"] = 1
+    wumpusFound = False
     
-    while not problem.isTeleporter(currentState):
+    while not problem.isTeleporter(currentState): #while true
         premise_s = Clause(Literal('s', currentState, not problem.isWumpusClose(currentState)))
         premise_b = Clause(Literal('b', currentState, not problem.isPoisonCapsuleClose(currentState)))
         premise_g = Clause(Literal('g', currentState, not problem.isTeleporterClose(currentState)))
@@ -119,16 +120,10 @@ def logicBasedSearch(problem):
                 if state not in gameMap.keys():
                     gameMap[state] = propDict.copy()
 
-                goal_t = Clause(Literal('t', state, True))
-                _teleporter = resolution(set([premise_g, premise_t(currentState, state)]), goal_t)
-                if _teleporter:
-                    gameMap[state]["teleporter"] = -1
-                goal_w = Clause(Literal('w', state, True))
-                _wumpus = resolution(set([premise_s, premise_w(currentState, state)]), goal_w)
+                _wumpus = notWumpusFinder(premise_s, currentState, state)
                 if _wumpus:
                     gameMap[state]["wumpus"] = -1
-                goal_p = Clause(Literal('p', state, True))
-                _poison = resolution(set([premise_b, premise_p(currentState, state)]), goal_p)
+                _poison = notPoisonFinder(premise_b, currentState, state)
                 if _poison:
                     gameMap[state]["poison"] = -1
 
@@ -139,12 +134,6 @@ def logicBasedSearch(problem):
                 if wumpus:
                     gameMap[state]["wumpus"] = 1
                     wumpusFound = True
-                teleport = teleportFinder(problem, premise_g, currentState, state, gameMap)
-                if teleport:
-                    gameMap[state]["teleport"] = 1
-                    teleportFound = True
-                    visitedStates.append(state)
-                    return problem.reconstructPath(visitedStates)
 
                 if _wumpus and _poison:
                     gameMap[state]["safe"] = 1
@@ -161,6 +150,7 @@ def logicBasedSearch(problem):
                 currentState = safeStates.pop()
             else:
                 while currentState in visitedStates or repeat:
+                    repeat = False
                     if len(unknownStates.heap) > 0:
                         fullState = unknownStates.pop()
                         currentState = fullState[0]
@@ -169,7 +159,11 @@ def logicBasedSearch(problem):
                         premise_b = Clause(Literal('b', lastState, not problem.isPoisonCapsuleClose(lastState)))
                         poison = poisonFinder(problem, premise_b, lastState, currentState, gameMap)
                         wumpus = wumpusFinder(problem, premise_s, lastState, currentState, gameMap)
-                        if poison or wumpus:
+                        if poison:
+                            gameMap[currentState]["poison"] = 1
+                            repeat = True
+                        elif wumpus:
+                            gameMap[currentState]["wumpus"] = 1
                             repeat = True
                     else:
                         return problem.reconstructPath(visitedStates)
@@ -179,20 +173,23 @@ def logicBasedSearch(problem):
     return problem.reconstructPath(visitedStates)
 
 
-def positionIndex (state):
-    return 20*state[0] + state[1]
+def stateWeightSpecial (state):
+    return 20*state[0][0] + state[0][1]
 
-    #s - stench      w - wumpus
-    #b - breeze      p - poison pill
-    #g - glow        t - teleporter
-def premise_w (centerState, otherState): # Pacard doesn't smell stench -> no Wumpus around
-    return Clause(set([Literal('s', centerState), Literal('w', otherState, True)]))
+def notPoisonFinder(premise, centerState, otherState):
+    goal = Clause(Literal('p', otherState, True))
+    premises = set([premise, Clause(set([Literal('b', centerState), Literal('p', otherState, True)]))])
+    return resolution(premises, goal)
 
-def premise_p (centerState, otherState): # Pacard doesn't smell chemicals -> no pills around
-    return Clause(set([Literal('b', centerState), Literal('p', otherState, True)]))
+def notWumpusFinder(premise, centerState, otherState):
+    goal = Clause(Literal('w', otherState, True))
+    premises = set([premise, Clause(set([Literal('s', centerState), Literal('w', otherState, True)]))])
+    return resolution(premises, goal)
 
-def premise_t (centerState, otherState): # Pacard doesn't see glow -> no telepoter around
-    return Clause(set([Literal('g', centerState), Literal('t', otherState, True)]))
+#def notTeleportFinder(premise, centerState, otherState):
+#    goal = Clause(Literal('t', otherState, True))
+#    premises = set([premise, Clause(set([Literal('g', centerState), Literal('t', otherState, True)]))])
+#    return resolution(premises, goal)
 
 def poisonFinder(problem, premise, centerState, otherState, gameMap):
     goal = Clause(Literal('p', otherState))
@@ -228,22 +225,22 @@ def wumpusFinder(problem, premise, centerState, otherState, gameMap):
     premises.add(rule)
     return resolution(premises, goal)
 
-def teleportFinder(problem, premise, centerState, otherState, gameMap):
-    goal = Clause(Literal('t', otherState))
-    ruleLiterals = set([Literal('g', centerState, True), Literal('t', otherState)])
-    premises = set([premise])
+#def teleportFinder(problem, premise, centerState, otherState, gameMap):
+#    goal = Clause(Literal('t', otherState))
+#    ruleLiterals = set([Literal('g', centerState, True), Literal('t', otherState)])
+#    premises = set([premise])
 
-    for state_total in problem.getSuccessors(centerState):
-        state = state_total[0]
-        if state != otherState:
-            ruleLiterals.add(Literal('o', state, True))
-            subGameMap = gameMap.get(state, {"safe":0, "poison":0, "wumpus":0, "teleporter":0})
-            isSafe = (subGameMap["safe"] == 1)
-            premise = Clause(Literal('o', state, not isSafe))
-            premises.add(premise)
-    rule = Clause(ruleLiterals)
-    premises.add(rule)
-    return resolution(premises, goal)
+#    for state_total in problem.getSuccessors(centerState):
+#        state = state_total[0]
+#        if state != otherState:
+#            ruleLiterals.add(Literal('o', state, True))
+#            subGameMap = gameMap.get(state, {"safe":0, "poison":0, "wumpus":0, "teleporter":0})
+#            isSafe = (subGameMap["safe"] == 1)
+#            premise = Clause(Literal('o', state, not isSafe))
+#            premises.add(premise)
+#    rule = Clause(ruleLiterals)
+#    premises.add(rule)
+#    return resolution(premises, goal)
     
 
 
