@@ -153,17 +153,27 @@ def logicBasedSearch(problem):
                     gameMap[state]["safe"] = 1
                     safeStates.push(state)
                 elif gameMap[state]["poison"] != 1 and gameMap[state]["wumpus"] != 1:
-                    unknownStates.push(state)
+                    unknownStates.push( (state, currentState) )
 
+        repeat = False
         while currentState in visitedStates:
             if len(safeStates.heap) > 0:
                 currentState = safeStates.pop()
             else:
-                while currentState in visitedStates:
+                while currentState in visitedStates or repeat:
                     if len(unknownStates.heap) > 0:
-                        currentState = unknownStates.pop()
+                        fullState = unknownStates.pop()
+                        currentState = fullState[0]
+                        lastState = fullState[1]
+                        premise_s = Clause(Literal('s', lastState, not problem.isWumpusClose(lastState)))
+                        premise_b = Clause(Literal('b', lastState, not problem.isPoisonCapsuleClose(lastState)))
+                        poison = poisonFinder(problem, premise_b, lastState, currentState, gameMap)
+                        wumpus = wumpusFinder(problem, premise_s, lastState, currentState, gameMap)
+                        if poison or wumpus:
+                            repeat = True
                     else:
                         return problem.reconstructPath(visitedStates)
+
         visitedStates.append(currentState)
     
     return problem.reconstructPath(visitedStates)
