@@ -109,7 +109,7 @@ def logicBasedSearch(problem):
     gameMap[currentState]["safe"] = 1
     wumpusFound = False
     
-    while not problem.isTeleporter(currentState): #while true
+    while not problem.isGoalState(currentState): #while true
         premise_s = Clause(Literal('s', currentState, not problem.isWumpusClose(currentState)))
         premise_b = Clause(Literal('b', currentState, not problem.isPoisonCapsuleClose(currentState)))
         premise_g = Clause(Literal('g', currentState, not problem.isTeleporterClose(currentState)))
