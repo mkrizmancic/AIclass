@@ -44,9 +44,20 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.values = util.Counter() # A Counter is a dict with default 0
 
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
-
-
+        for k in range(self.iterations):
+            helper = self.values.copy()
+            for state in self.mdp.getStates():
+                if self.mdp.isTerminal(state):
+                    continue
+                maks = -100000000
+                for a in mdp.getPossibleActions(state):
+                    sum = 0
+                    for (nextState, prob) in self.mdp.getTransitionStatesAndProbs(state, a):
+                        sum += prob * (self.mdp.getReward(state, a, nextState) + self.discount * helper[nextState])
+                    if sum > maks:
+                        maks = sum
+                self.values[state] = maks
+                    
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
@@ -60,7 +71,10 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        sum = 0
+        for (nextState, prob) in self.mdp.getTransitionStatesAndProbs(state, action):
+            sum += prob * (self.mdp.getReward(state, action, nextState) + self.discount * self.values[nextState])
+        return sum
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +86,20 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if self.mdp.isTerminal(state):
+            return None
+        maks = -1000000
+        bestAction = None
+        for a in self.mdp.getPossibleActions(state):
+            if bestAction == None:
+                bestAction = a
+            sum = 0
+            for (nextState, prob) in self.mdp.getTransitionStatesAndProbs(state, a):
+                sum += prob * (self.mdp.getReward(state, a, nextState) + self.discount * self.values[nextState])
+            if sum > maks:
+                maks = sum
+                bestAction = a
+        return bestAction
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)

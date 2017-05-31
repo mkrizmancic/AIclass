@@ -1,5 +1,6 @@
 import util
 import math
+import itertools
 
 class NaiveBayesClassifier(object):
     """
@@ -36,6 +37,24 @@ class NaiveBayesClassifier(object):
         # construct (and store) the normalized smoothed priors and conditional probabilities
 
         "*** YOUR CODE HERE ***"
+        for condition, decision in itertools.izip(trainingData, trainingLabels):
+            self.prior[decision] += 1
+            for feat, value in condition.iteritems():
+                self.conditionalProb[ (feat, value, decision) ] += 1
+
+        # Normalize and smooth
+        N = len(self.features)
+        for label in self.legalLabels:
+            for feature in self.features:
+                prob = (self.conditionalProb[(feature, 'True', label)] + self.k) / (float(self.prior[label]) + N * self.k)
+                self.conditionalProb[ (feature, 'True', label) ] = prob
+                prob = (self.conditionalProb[(feature, 'False', label)] + self.k) / (float(self.prior[label]) +  N *self.k)
+                self.conditionalProb[ (feature, 'False', label) ] = prob
+
+        N = len(self.legalLabels)
+        total = self.prior.totalCount()
+        self.prior.incrementAll(self.legalLabels, self.k)
+        self.prior.divideAll(total + N * self.k)
 
     def predict(self, testData):
         """
@@ -70,10 +89,10 @@ class NaiveBayesClassifier(object):
 
         for label in self.legalLabels:
             # calculate the joint probabilities for each class
-            "*** YOUR CODE HERE ***"
-
-            pass
-
+            product = self.prior[label]
+            for feat, value in instance.iteritems():
+                product *= self.conditionalProb[ (feat, value, label) ]
+            joint[label] = product
         return joint
 
 
@@ -90,8 +109,8 @@ class NaiveBayesClassifier(object):
 
         for label in self.legalLabels:
             #calculate the log joint probabilities for each class
-            "*** YOUR CODE HERE ***"
-
-            pass    
-
+            sum = math.log(self.prior[label])
+            for feat, value in instance.iteritems():
+                sum += math.log(self.conditionalProb[ (feat, value, label) ])
+            logJoint[label] = sum
         return logJoint

@@ -8,7 +8,7 @@ from dataLoader import loadDataset
 ## You can ignore this
 STATIC_RESULTS = {
     # dataset
-    'classifier_data/contest_training.tsv' : {
+    os.path.join('classifier_data', 'contest_training.tsv'): {
         # smoothing value
         0 : {
             # log transform
@@ -34,7 +34,7 @@ STATIC_RESULTS = {
         }
     },
     # dataset
-    'classifier_data/contest_test.tsv' : {
+    os.path.join('classifier_data', 'contest_training.tsv') : {
         # smoothing value
         0 : { 
             # log transform 
@@ -170,6 +170,7 @@ def readCommand(argv):
     data_root = 'classifier_data'
     
     args['train_path'] = os.path.join(data_root, options.train_loc + ".tsv")
+
     if not os.path.exists(args['train_path']):
         raise Exception("The training data file " + args['train_path'] + " doesn't exist! \n" + 
             "Please only enter the train file name without the extension, and place the file in the" + 
