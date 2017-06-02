@@ -34,7 +34,7 @@ STATIC_RESULTS = {
         }
     },
     # dataset
-    os.path.join('classifier_data', 'contest_training.tsv') : {
+    os.path.join('classifier_data','contest_test.tsv') : {
         # smoothing value
         0 : { 
             # log transform 
